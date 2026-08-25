@@ -1,0 +1,11 @@
+id,type,description
+1,readability,Avoid single-character variable names — they hurt readability
+2,performance,Cache repeated database lookups inside the request loop
+3,security,Never interpolate raw user input directly into SQL queries
+4,security,Validate and sanitize user-controlled file paths
+5,performance,Avoid nested loops when a set or dictionary lookup is sufficient
+6,architecture,Keep database access behind a service or repository boundary
+7,maintainability,Use small focused functions instead of large multi-purpose functions
+8,python,Avoid mutable default arguments in Python functions
+9,javascript,Avoid loose equality when strict equality is available
+10,java,Use parameterized queries and avoid string concatenation for SQL

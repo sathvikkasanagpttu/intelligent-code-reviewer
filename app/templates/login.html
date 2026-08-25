@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth">
+  <div class="hero-copy reveal">
+    <p class="eyebrow">THE 24/7 INTELLIGENT CODE REVIEWER</p>
+    <h1 class="text-3d">Ship cleaner code.<br><em>Every time.</em></h1>
+    <p>Automated multi-language analysis, quality scoring, security checks, architecture guidance and historical learning in one place.</p>
+    <div class="scene3d tilt compact">
+      <div class="grid-floor"></div><div class="scan"></div>
+      <div class="orbit one"><i class="orb-dot"></i></div><div class="orbit two"><i class="orb-dot"></i></div><div class="orbit three"><i class="orb-dot"></i></div><div class="core"></div>
+    </div>
+  </div>
+  <div class="card auth-card tilt reveal">
+    <h2>Sign in</h2>
+    {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+    <form method="post" action="/login">
+      <label>Email</label><input name="email" type="email" required placeholder="you@example.com">
+      <label>Password</label><input name="password" type="password" required placeholder="••••••••">
+      <button>Sign in</button>
+    </form>
+    <hr>
+    <h3>Create account</h3>
+    <form method="post" action="/register">
+      <label>Email</label><input name="email" type="email" required>
+      <label>Password</label><input name="password" type="password" minlength="8" required>
+      <button class="secondary">Register</button>
+    </form>
+    <p class="demo">Demo: demo@example.com / Demo@123</p>
+  </div>
+</section>
+{% endblock %}

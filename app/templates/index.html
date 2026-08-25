@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+{% if not user %}
+<section class="landing">
+  <div class="landing-copy reveal">
+    <p class="eyebrow">FEATURE FOCUS · AI CODE INTELLIGENCE</p>
+    <h1 class="text-3d">Multi-language Reviews,<br><em>Quality Rating & Historical Learning</em></h1>
+    <p class="lead">Build an automated, always-on intelligent code reviewer for the next generation of engineers.</p>
+    <a class="button" href="/login">Start reviewing →</a>
+  </div>
+  <div class="scene3d tilt" aria-label="Animated 3D code intelligence visualization">
+    <div class="grid-floor"></div><div class="scan"></div>
+    <div class="orbit one"><i class="orb-dot"></i></div>
+    <div class="orbit two"><i class="orb-dot"></i></div>
+    <div class="orbit three"><i class="orb-dot"></i></div>
+    <div class="core"></div>
+    <div class="holo-label">● SYSTEM <b>ONLINE</b> · 24/7</div>
+  </div>
+</section>
+{% else %}
+<section class="dashboard-head reveal">
+  <div><p class="eyebrow">WELCOME BACK</p><h1 class="text-3d">Engineering quality cockpit</h1><p>Review code, learn from history, and track improvement over time.</p></div>
+  <div class="score-ring tilt"><strong id="avgScore">—</strong><span>AVG SCORE</span></div>
+</section>
+
+<section class="stats">
+  <div class="stat tilt reveal"><span>Reviews</span><b id="totalReviews">0</b></div>
+  <div class="stat tilt reveal"><span>Best score</span><b id="bestScore">0</b></div>
+  <div class="stat tilt reveal"><span>Top issue</span><b id="topIssue">—</b></div>
+  <div class="stat tilt reveal"><span>Languages</span><b>7+</b></div>
+</section>
+
+<section id="reviewer" class="grid">
+  <div class="card editor-card tilt reveal">
+    <div class="section-title"><div><p class="eyebrow">NEW REVIEW</p><h2>Analyze source code</h2></div></div>
+    <div class="form-row">
+      <div><label>Language</label><select id="language"><option>python</option><option>javascript</option><option>java</option><option>cpp</option><option>c</option><option>go</option><option>sql</option></select></div>
+      <div><label>Filename</label><input id="filename" value="submission.py"></div>
+    </div>
+    <label>Source code</label>
+    <textarea id="source" spellcheck="false">def get_user(user_id):
+    query = "SELECT * FROM users WHERE id = " + user_id
+    return execute(query)
+
+for i in users:
+    print(i)</textarea>
+    <button onclick="runReview()">Run intelligent review →</button>
+    <div id="status"></div>
+  </div>
+
+  <div class="card result-card tilt reveal">
+    <div class="result-top"><div><p class="eyebrow">QUALITY RATING</p><div class="big-score" id="score">—</div></div><div id="scoreLabel">Awaiting review</div></div>
+    <p id="summary">Submit code to receive a standardized 1–10 quality rating.</p>
+    <div id="findings"></div>
+  </div>
+</section>
+
+<section class="card history tilt reveal">
+  <div class="section-title"><div><p class="eyebrow">HISTORICAL LEARNING</p><h2>Your review history</h2></div><button class="secondary small" onclick="loadHistory()">Refresh</button></div>
+  <div id="historyTable">Loading…</div>
+</section>
+{% endif %}
+<script>
+async function loadDashboard(){
+  const r=await fetch('/api/dashboard'); if(!r.ok)return;
+  const d=await r.json();
+  document.getElementById('avgScore').textContent=d.average_score||'—';
+  document.getElementById('totalReviews').textContent=d.total_reviews;
+  document.getElementById('bestScore').textContent=d.best_score||0;
+  const cats=Object.entries(d.categories).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('topIssue').textContent=cats[0]?.[0]||'—';
+}
+async function loadHistory(){
+  const r=await fetch('/api/reviews'); if(!r.ok)return;
+  const rows=await r.json();
+  if(!rows.length){document.getElementById('historyTable').innerHTML='<p class="muted">No reviews yet. Run your first review above.</p>';return;}
+  document.getElementById('historyTable').innerHTML='<div class="table"><div class="tr th"><span>File</span><span>Language</span><span>Score</span><span>Date</span></div>'+rows.map(x=>`<div class="tr"><span>${esc(x.filename)}</span><span>${x.language}</span><strong>${x.score}/10</strong><span>${new Date(x.created_at).toLocaleString()}</span></div>`).join('')+'</div>';
+}
+async function runReview(){
+  const status=document.getElementById('status'); status.textContent='Analyzing code and matching historical review patterns…';
+  const r=await fetch('/api/reviews',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({language:document.getElementById('language').value,filename:document.getElementById('filename').value,source_code:document.getElementById('source').value})});
+  const d=await r.json(); if(!r.ok){status.textContent=d.detail||'Review failed';return;}
+  status.textContent='Review completed and saved to your session history.';
+  document.getElementById('score').textContent=d.score+'/10';
+  document.getElementById('scoreLabel').textContent=d.score>=9?'Excellent':d.score>=7?'Good':d.score>=5?'Needs improvement':'High-priority remediation';
+  document.getElementById('summary').textContent=d.summary;
+  const detail=await fetch('/api/reviews/'+d.id); const x=await detail.json();
+  document.getElementById('findings').innerHTML=x.findings.map(f=>`<article class="finding"><div class="finding-head"><span class="badge ${f.severity}">${f.severity}</span><b>${esc(f.title)}</b>${f.line_number?`<small>Line ${f.line_number}</small>`:''}</div><p>${esc(f.description)}</p><div class="recommend">↳ ${esc(f.recommendation)}</div></article>`).join('');
+  loadDashboard();loadHistory();
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+{% if user %}loadDashboard();loadHistory();{% endif %}
+</script>
+{% endblock %}

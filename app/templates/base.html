@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title or "Intelligent Code Reviewer" }}</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<canvas id="webgl-bg"></canvas>
+<div class="grain"></div>
+<nav class="nav">
+  <div class="brand">CR<span>24/7</span></div>
+  {% if user %}
+  <div class="navlinks"><a href="/">Dashboard</a><a href="#reviewer">New Review</a><a href="/logout">Logout</a></div>
+  {% endif %}
+</nav>
+<main>{% block content %}{% endblock %}</main>
+<footer>24/7 Intelligent Code Reviewer · Multi-language · Historical Learning</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/static/js/scene3d.js"></script>
+<script src="/static/js/app.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
